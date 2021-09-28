@@ -1,0 +1,23 @@
+---
+Name: campaignmonitor
+Before:
+  - '#app'
+After:
+  - '#coreconfig'
+  - '#cmsextensions'
+---
+SilverStripe\Security\Member:
+  extensions:
+    - Sunnysideup\CampaignMonitor\Decorators\CampaignMonitorMemberDOD
+
+SilverStripe\Security\Group:
+  extensions:
+    - Sunnysideup\CampaignMonitor\Decorators\CampaignMonitorGroupDOD
+
+
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.CampaignMonitor:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "CampaignMonitorNameSpace"
+      disable-container: true
