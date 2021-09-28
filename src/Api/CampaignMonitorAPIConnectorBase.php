@@ -1,6 +1,6 @@
 <?php
 
-namespace Sunnysideup\CampaignMonitor\Api;
+namespace Sunnysideup\CampaignMonitorApi\Api;
 
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Core\Config\Configurable;
