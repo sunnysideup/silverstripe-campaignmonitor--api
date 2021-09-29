@@ -149,7 +149,7 @@ class CampaignMonitorAPIConnectorBase
             $redirect_uri = $this->Config()->get('redirect_uri');
             $code = $this->Config()->get('code');
 
-            $result = CS_REST_General::exchange_token($client_id, $client_secret, $redirect_uri, $code);
+            $result = \CS_REST_General::exchange_token($client_id, $client_secret, $redirect_uri, $code);
 
             if ($result->was_successful()) {
                 $auth = [
