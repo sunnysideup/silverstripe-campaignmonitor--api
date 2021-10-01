@@ -146,19 +146,19 @@ class CampaignMonitorAPIConnectorBase
         if ($apiKey = $this->Config()->get('api_key')) {
             $auth = ['api_key' => $apiKey];
         } else {
-            $client_id = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
-            if(!$client_id) {
-                $client_id = $this->Config()->get('client_id');
+            $clientId = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
+            if(!$clientId) {
+                $clientId = $this->Config()->get('client_id');
             }
 
-            $client_secret = Environment::getEnv('SS_CAMPAIGNMONITOR_API_KEY');
-            if(!$client_secret) {
-                $client_secret = $this->Config()->get('client_secret');
+            $clientSecret = Environment::getEnv('SS_CAMPAIGNMONITOR_API_KEY');
+            if(!$clientSecret) {
+                $clientSecret = $this->Config()->get('client_secret');
             }
-            $redirect_uri = $this->Config()->get('redirect_uri');
+            $redirectUri = $this->Config()->get('redirect_uri');
             $code = $this->Config()->get('code');
 
-            $result = \CS_REST_General::exchange_token($client_id, $client_secret, $redirect_uri, $code);
+            $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
 
             if ($result->was_successful()) {
                 $auth = [

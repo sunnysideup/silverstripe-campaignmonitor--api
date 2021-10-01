@@ -4,6 +4,8 @@
 
 Sunnysideup\CampaignMonitorApi\Api\CampaignMonitorAPIConnectorBase:
   ### REQUIRED ###
+  ### NOTE YOU CAN ALSO SET THIS IN YOUR .ENV FILE - RECOMMENDED! ###
+
   ## e.g. http://mycompany.sendmail.com/
   campaign_monitor_url: ""
   client_id: ""

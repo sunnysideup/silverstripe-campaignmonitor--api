@@ -42,7 +42,12 @@ class MyCampaignMonitor extends CampaignMonitorAPIConnectorBase
     {
         //require_once '../../csrest_clients.php';
         require_once BASE_PATH . '/vendor/campaignmonitor/createsend-php/csrest_clients.php';
-        $wrap = new \CS_REST_Clients($this->Config()->get('client_id'), $this->getAuth());
+        $client_id = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
+        if(! $client_id) {
+            $client_id = $this->Config()->get('client_id');
+        }
+
+        $wrap = new \CS_REST_Clients($this->Config()->get($client_id), $this->getAuth());
         $result = $wrap->get_lists();
 
         return $this->returnResult(
