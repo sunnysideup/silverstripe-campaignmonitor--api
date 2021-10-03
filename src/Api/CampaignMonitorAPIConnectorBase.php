@@ -143,20 +143,14 @@ class CampaignMonitorAPIConnectorBase
         if ($auth = $this->getFromCache('getAuth')) {
             return $auth;
         }
-        if ($apiKey = $this->Config()->get('api_key')) {
+        $apiKey = $this->getApiKey();
+        if ($apiKey) {
             $auth = ['api_key' => $apiKey];
         } else {
-            $clientId = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
-            if(!$clientId) {
-                $clientId = $this->Config()->get('client_id');
-            }
-
-            $clientSecret = Environment::getEnv('SS_CAMPAIGNMONITOR_API_KEY');
-            if(!$clientSecret) {
-                $clientSecret = $this->Config()->get('client_secret');
-            }
-            $redirectUri = $this->Config()->get('redirect_uri');
-            $code = $this->Config()->get('code');
+            $clientId = $this->getClientId();
+            $clientSecret = $this->getClientSecret();
+            $code = $this->getCode();
+            $redirectUri = $this->getRedirectUri();
 
             $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
 
@@ -283,6 +277,52 @@ class CampaignMonitorAPIConnectorBase
     protected function getCache()
     {
         return Injector::inst()->get(CacheInterface::class . '.CampaignMonitor');
+    }
+
+    protected function getApiKey() : string
+    {
+        $apiKey = Environment::getEnv('SS_CAMPAIGNMONITOR_API_KEY');
+        if(!$apiKey) {
+            $apiKey = $this->Config()->get('api_key');
+        }
+        return trim($apiKey);
+    }
+
+    protected function getClientId() : string
+    {
+        $clientId = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
+        if(!$clientId) {
+            $clientId = $this->Config()->get('client_id');
+        }
+        return trim($clientId);
+    }
+
+    protected function getClientSecret() : string
+    {
+        $clientSecret = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_SECRET');
+        if(!$clientSecret) {
+            $clientSecret = $this->Config()->get('client_secret');
+        }
+        return trim($clientSecret);
+    }
+
+    protected function getCode() : string
+    {
+        $code = Environment::getEnv('SS_CAMPAIGNMONITOR_CODE');
+        if(!$code) {
+            $code = $this->Config()->get('code');
+        }
+        return trim($code);
+    }
+
+
+    protected function getRedirectUri() : string
+    {
+        $uri = Environment::getEnv('SS_CAMPAIGNMONITOR_REDIRECT_URI');
+        if(!$uri) {
+            $uri = $this->Config()->get('campaign_monitor_url');
+        }
+        return trim($uri);
     }
 
     /**
