@@ -281,48 +281,41 @@ class CampaignMonitorAPIConnectorBase
 
     protected function getApiKey() : string
     {
-        $apiKey = Environment::getEnv('SS_CAMPAIGNMONITOR_API_KEY');
-        if(!$apiKey) {
-            $apiKey = $this->Config()->get('api_key');
-        }
-        return trim($apiKey);
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key');
     }
 
     protected function getClientId() : string
     {
-        $clientId = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_ID');
-        if(!$clientId) {
-            $clientId = $this->Config()->get('client_id');
-        }
-        return trim($clientId);
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id');
     }
 
     protected function getClientSecret() : string
     {
-        $clientSecret = Environment::getEnv('SS_CAMPAIGNMONITOR_CLIENT_SECRET');
-        if(!$clientSecret) {
-            $clientSecret = $this->Config()->get('client_secret');
-        }
-        return trim($clientSecret);
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret');
     }
 
     protected function getCode() : string
     {
-        $code = Environment::getEnv('SS_CAMPAIGNMONITOR_CODE');
-        if(!$code) {
-            $code = $this->Config()->get('code');
-        }
-        return trim($code);
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code');
     }
-
 
     protected function getRedirectUri() : string
     {
-        $uri = Environment::getEnv('SS_CAMPAIGNMONITOR_REDIRECT_URI');
-        if(!$uri) {
-            $uri = $this->Config()->get('campaign_monitor_url');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url');
+    }
+
+    protected function getEnvOrConfigVar(string $envVar, string $configVar)
+    {
+        $var = Environment::getEnv($envVar);
+        if(! $var) {
+            $var = $this->Config()->get($configVar);
         }
-        return trim($uri);
+        $var = trim($var);
+        if(! $var) {
+            user_error('Please set .env var '.$configVar.' or config var '.$configVar, E_USER_NOTICE);
+        }
+
+        return $var;
     }
 
     /**
