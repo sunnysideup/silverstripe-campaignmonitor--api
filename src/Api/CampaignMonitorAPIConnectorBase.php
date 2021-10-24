@@ -4,11 +4,10 @@ namespace Sunnysideup\CampaignMonitorApi\Api;
 
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
-
-use SilverStripe\Core\Environment;
 
 class CampaignMonitorAPIConnectorBase
 {
@@ -279,27 +278,27 @@ class CampaignMonitorAPIConnectorBase
         return Injector::inst()->get(CacheInterface::class . '.CampaignMonitor');
     }
 
-    protected function getApiKey() : string
+    protected function getApiKey(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key');
     }
 
-    protected function getClientId() : string
+    protected function getClientId(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id');
     }
 
-    protected function getClientSecret() : string
+    protected function getClientSecret(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret');
     }
 
-    protected function getCode() : string
+    protected function getCode(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code');
     }
 
-    protected function getRedirectUri() : string
+    protected function getRedirectUri(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url');
     }
@@ -307,12 +306,12 @@ class CampaignMonitorAPIConnectorBase
     protected function getEnvOrConfigVar(string $envVar, string $configVar)
     {
         $var = Environment::getEnv($envVar);
-        if(! $var) {
+        if (! $var) {
             $var = $this->Config()->get($configVar);
         }
         $var = trim($var);
-        if(! $var) {
-            user_error('Please set .env var '.$configVar.' or config var '.$configVar, E_USER_NOTICE);
+        if (! $var) {
+            user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
         }
 
         return $var;
