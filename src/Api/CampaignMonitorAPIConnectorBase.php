@@ -139,7 +139,8 @@ class CampaignMonitorAPIConnectorBase
      */
     protected function getAuth()
     {
-        if ($auth = $this->getFromCache('getAuth')) {
+        $auth = $this->getFromCache('getAuth');
+        if ($auth) {
             return $auth;
         }
         $apiKey = $this->getApiKey();
