@@ -9,6 +9,8 @@ use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 
+use SilverStripe\Control\Controller;
+
 class CampaignMonitorAPIConnectorBase
 {
     use Configurable;
@@ -90,6 +92,17 @@ class CampaignMonitorAPIConnectorBase
 
     /**
      * must be called to use this API.
+     * Check if the API is ready to do stuff...
+     */
+    public function isAvailable() : bool
+    {
+        $class = Injector::inst()->get(static::class);
+        $auth = $class->getAuth();
+        return empty($auth) === false ? true :  false;
+    }
+
+    /**
+     * must be called to use this API.
      */
     public function init()
     {
@@ -138,51 +151,56 @@ class CampaignMonitorAPIConnectorBase
     protected function getAuth()
     {
         $auth = $this->getFromCache('getAuth');
-        if ($auth) {
+        if (!empty($auth)) {
             return $auth;
         }
+        $auth = [];
         $apiKey = $this->getApiKey();
         if ($apiKey) {
             $auth = ['api_key' => $apiKey];
         } else {
             $clientId = $this->getClientId();
-            $clientSecret = $this->getClientSecret();
-            $code = $this->getCode();
-            $redirectUri = $this->getRedirectUri();
+            $clientSecret = $clientId ? $this->getClientSecret() : '';
+            $code = $clientSecret ? $this->getCode() : '';
+            $redirectUri = $clientSecret ? $this->getRedirectUri() : '';
+            if($clientId && $clientSecret && $redirectUri && $code) {
+                $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
 
-            $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
-
-            if ($result->was_successful()) {
-                $auth = [
-                    'access_token' => $result->response->access_token,
-                    'refresh_token' => $result->response->refresh_token,
-                ];
-                //TODO: do we need to check expiry date?
-                //$expires_in = $result->response->expires_in;
-                // Save $access_token, $expires_in, and $refresh_token.
-                if ($this->debug) {
-                    echo 'access token: ' . $result->response->access_token . "\n";
-                    echo 'expires in (seconds): ' . $result->response->expires_in . "\n";
-                    echo 'refresh token: ' . $result->response->refresh_token . "\n";
-                }
-            } else {
-                // If you receive '121: Expired OAuth Token', refresh the access token
-                if (121 === $result->response->Code) {
-                    $wrap = new \CS_REST_General($auth);
-                    list($new_access_token, , $new_refresh_token) = $wrap->refresh_token();
-
+                if ($result->was_successful()) {
                     $auth = [
-                        'access_token' => $new_access_token,
-                        'refresh_token' => $new_refresh_token,
+                        'access_token' => $result->response->access_token,
+                        'refresh_token' => $result->response->refresh_token,
                     ];
-                }
-
-                if ($this->debug) {
+                    //TODO: do we need to check expiry date?
+                    //$expires_in = $result->response->expires_in;
+                    // Save $access_token, $expires_in, and $refresh_token.
+                    if ($this->debug) {
+                        echo 'access token: ' . $result->response->access_token . "\n";
+                        echo 'expires in (seconds): ' . $result->response->expires_in . "\n";
+                        echo 'refresh token: ' . $result->response->refresh_token . "\n";
+                    }
+                } else {
+                    // If you receive '121: Expired OAuth Token', refresh the access token
+                    if ($result->response && 121 === $result->response->Code) {
+                        $url = \CS_REST_General::authorize_url($clientId, $clientSecret, $redirectUri, $code);
+                        return Controller::curr()->redirect($url);
+                        // $wrap =
+                        // list($new_access_token, , $new_refresh_token) = $wrap->refresh_token();
+                        //
+                        // $auth = [
+                        //     'access_token' => $new_access_token,
+                        //     'refresh_token' => $new_refresh_token,
+                        // ];
+                    }
                 }
             }
+            if(! empty($auth)) {
+                $this->saveToCache($auth, 'getAuth');
+            }
         }
-        $this->saveToCache($auth, 'getAuth');
-
+        if(empty($auth)) {
+            $auth = [];
+        }
         return $auth;
     }
 
@@ -279,37 +297,37 @@ class CampaignMonitorAPIConnectorBase
 
     protected function getApiKey(): string
     {
-        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key', true);
     }
 
     protected function getClientId(): string
     {
-        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id', true);
     }
 
     protected function getClientSecret(): string
     {
-        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret', true);
     }
 
     protected function getCode(): string
     {
-        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code', true);
     }
 
     protected function getRedirectUri(): string
     {
-        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url');
+        return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url', true);
     }
 
-    protected function getEnvOrConfigVar(string $envVar, string $configVar)
+    protected function getEnvOrConfigVar(string $envVar, string $configVar, ?bool $allowToBeEmpty = false)
     {
         $var = Environment::getEnv($envVar);
         if (! $var) {
             $var = $this->Config()->get($configVar);
         }
         $var = trim($var);
-        if (! $var) {
+        if (! $var && $allowToBeEmpty === false) {
             user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
         }
 
