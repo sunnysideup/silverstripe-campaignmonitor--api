@@ -267,7 +267,7 @@ class CampaignMonitorAPIConnectorBase
             $cache = $this->getCache();
             $value = $cache->has($name) ? $cache->get($name) : null;
             if ($value) {
-                return unserialize($value);
+                return strtotime((string) $value);
             }
         }
 
