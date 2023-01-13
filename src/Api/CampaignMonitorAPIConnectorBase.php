@@ -3,13 +3,12 @@
 namespace Sunnysideup\CampaignMonitorApi\Api;
 
 use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
-
-use SilverStripe\Control\Controller;
 
 class CampaignMonitorAPIConnectorBase
 {
@@ -94,11 +93,12 @@ class CampaignMonitorAPIConnectorBase
      * must be called to use this API.
      * Check if the API is ready to do stuff...
      */
-    public function isAvailable() : bool
+    public function isAvailable(): bool
     {
         $class = Injector::inst()->get(static::class);
         $auth = $class->getAuth();
-        return empty($auth) === false ? true :  false;
+
+        return false === empty($auth) ? true : false;
     }
 
     /**
@@ -151,7 +151,7 @@ class CampaignMonitorAPIConnectorBase
     protected function getAuth()
     {
         $auth = $this->getFromCache('getAuth');
-        if (!empty($auth)) {
+        if (! empty($auth)) {
             return $auth;
         }
         $auth = [];
@@ -163,7 +163,7 @@ class CampaignMonitorAPIConnectorBase
             $clientSecret = $clientId ? $this->getClientSecret() : '';
             $code = $clientSecret ? $this->getCode() : '';
             $redirectUri = $clientSecret ? $this->getRedirectUri() : '';
-            if($clientId && $clientSecret && $redirectUri && $code) {
+            if ($clientId && $clientSecret && $redirectUri && $code) {
                 $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
 
                 if ($result->was_successful()) {
@@ -183,6 +183,7 @@ class CampaignMonitorAPIConnectorBase
                     // If you receive '121: Expired OAuth Token', refresh the access token
                     if ($result->response && 121 === $result->response->Code) {
                         $url = \CS_REST_General::authorize_url($clientId, $clientSecret, $redirectUri, $code);
+
                         return Controller::curr()->redirect($url);
                         // $wrap =
                         // list($new_access_token, , $new_refresh_token) = $wrap->refresh_token();
@@ -194,13 +195,14 @@ class CampaignMonitorAPIConnectorBase
                     }
                 }
             }
-            if(! empty($auth)) {
+            if (! empty($auth)) {
                 $this->saveToCache($auth, 'getAuth');
             }
         }
-        if(empty($auth)) {
+        if (empty($auth)) {
             $auth = [];
         }
+
         return $auth;
     }
 
@@ -327,7 +329,7 @@ class CampaignMonitorAPIConnectorBase
             $var = $this->Config()->get($configVar);
         }
         $var = trim($var);
-        if (! $var && $allowToBeEmpty === false) {
+        if (! $var && false === $allowToBeEmpty) {
             user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
         }
 
