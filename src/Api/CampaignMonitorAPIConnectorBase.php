@@ -89,14 +89,18 @@ class CampaignMonitorAPIConnectorBase
         return self::$error_description;
     }
 
+    public static function inst(): static
+    {
+        return Injector::inst()->get(static::class);
+    }
+
     /**
      * must be called to use this API.
      * Check if the API is ready to do stuff...
      */
     public function isAvailable(): bool
     {
-        $class = Injector::inst()->get(static::class);
-        $auth = $class->getAuth();
+        $auth = $this->getAuth();
 
         return false === empty($auth) ? true : false;
     }
@@ -151,7 +155,7 @@ class CampaignMonitorAPIConnectorBase
     protected function getAuth()
     {
         $auth = $this->getFromCache('getAuth');
-        if (! empty($auth)) {
+        if (!empty($auth)) {
             return $auth;
         }
         $auth = [];
@@ -195,7 +199,7 @@ class CampaignMonitorAPIConnectorBase
                     }
                 }
             }
-            if (! empty($auth)) {
+            if (!empty($auth)) {
                 $this->saveToCache($auth, 'getAuth');
             }
         }
@@ -245,7 +249,7 @@ class CampaignMonitorAPIConnectorBase
             return null;
         }
         if ($result->was_successful()) {
-            if (! empty($result->response)) {
+            if (!empty($result->response)) {
                 return $result->response;
             }
 
@@ -297,27 +301,27 @@ class CampaignMonitorAPIConnectorBase
         return Injector::inst()->get(CacheInterface::class . '.CampaignMonitor');
     }
 
-    protected function getApiKey(): string
+    public function getApiKey(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key', true);
     }
 
-    protected function getClientId(): string
+    public function getClientId(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id', true);
     }
 
-    protected function getClientSecret(): string
+    public function getClientSecret(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret', true);
     }
 
-    protected function getCode(): string
+    public function getCode(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code', true);
     }
 
-    protected function getRedirectUri(): string
+    public function getRedirectUri(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url', true);
     }
@@ -325,12 +329,12 @@ class CampaignMonitorAPIConnectorBase
     protected function getEnvOrConfigVar(string $envVar, string $configVar, ?bool $allowToBeEmpty = false)
     {
         $var = Environment::getEnv($envVar);
-        if (! $var) {
+        if (!$var) {
             $var = $this->Config()->get($configVar);
         }
         $var = trim($var);
-        if (! $var && false === $allowToBeEmpty) {
-            user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
+        if (!$var && false === $allowToBeEmpty) {
+            user_error('Please set .env var ' . $envVar . ' (recommended) or config var ' . $configVar, E_USER_NOTICE);
         }
 
         return $var;
@@ -341,7 +345,7 @@ class CampaignMonitorAPIConnectorBase
      */
     protected function cleanCustomFields($customFields): array
     {
-        if (! is_array($customFields)) {
+        if (!is_array($customFields)) {
             $customFields = [];
         }
         $customFieldsBetter = [];
