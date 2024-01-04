@@ -90,6 +90,11 @@ class CampaignMonitorAPIConnectorBase
         return self::$error_description;
     }
 
+    public static function inst(): static
+    {
+        return Injector::inst()->get(static::class);
+    }
+
     /**
      * must be called to use this API.
      * Check if the API is ready to do stuff...
@@ -298,27 +303,27 @@ class CampaignMonitorAPIConnectorBase
         return Injector::inst()->get(CacheInterface::class . '.CampaignMonitor');
     }
 
-    protected function getApiKey(): string
+    public function getApiKey(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_API_KEY', 'api_key', true);
     }
 
-    protected function getClientId(): string
+    public function getClientId(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_ID', 'client_id', true);
     }
 
-    protected function getClientSecret(): string
+    public function getClientSecret(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CLIENT_SECRET', 'client_secret', true);
     }
 
-    protected function getCode(): string
+    public function getCode(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_CODE', 'code', true);
     }
 
-    protected function getRedirectUri(): string
+    public function getRedirectUri(): string
     {
         return $this->getEnvOrConfigVar('SS_CAMPAIGNMONITOR_REDIRECT_URI', 'campaign_monitor_url', true);
     }
@@ -331,7 +336,7 @@ class CampaignMonitorAPIConnectorBase
         }
         $var = trim($var);
         if (!$var && false === $allowToBeEmpty) {
-            user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
+            user_error('Please set .env var ' . $envVar . ' (recommended) or config var ' . $configVar, E_USER_NOTICE);
         }
 
         return $var;
