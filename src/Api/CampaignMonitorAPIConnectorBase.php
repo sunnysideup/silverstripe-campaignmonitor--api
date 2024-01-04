@@ -9,6 +9,7 @@ use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
+use CS_REST_General;
 
 class CampaignMonitorAPIConnectorBase
 {
@@ -151,7 +152,7 @@ class CampaignMonitorAPIConnectorBase
     protected function getAuth()
     {
         $auth = $this->getFromCache('getAuth');
-        if (! empty($auth)) {
+        if (!empty($auth)) {
             return $auth;
         }
         $auth = [];
@@ -164,7 +165,7 @@ class CampaignMonitorAPIConnectorBase
             $code = $clientSecret ? $this->getCode() : '';
             $redirectUri = $clientSecret ? $this->getRedirectUri() : '';
             if ($clientId && $clientSecret && $redirectUri && $code) {
-                $result = \CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
+                $result = CS_REST_General::exchange_token($clientId, $clientSecret, $redirectUri, $code);
 
                 if ($result->was_successful()) {
                     $auth = [
@@ -182,7 +183,7 @@ class CampaignMonitorAPIConnectorBase
                 } else {
                     // If you receive '121: Expired OAuth Token', refresh the access token
                     if ($result->response && 121 === $result->response->Code) {
-                        $url = \CS_REST_General::authorize_url($clientId, $clientSecret, $redirectUri, $code);
+                        $url = CS_REST_General::authorize_url($clientId, $clientSecret, $redirectUri, $code);
 
                         return Controller::curr()->redirect($url);
                         // $wrap =
@@ -195,7 +196,7 @@ class CampaignMonitorAPIConnectorBase
                     }
                 }
             }
-            if (! empty($auth)) {
+            if (!empty($auth)) {
                 $this->saveToCache($auth, 'getAuth');
             }
         }
@@ -245,7 +246,7 @@ class CampaignMonitorAPIConnectorBase
             return null;
         }
         if ($result->was_successful()) {
-            if (! empty($result->response)) {
+            if (!empty($result->response)) {
                 return $result->response;
             }
 
@@ -325,11 +326,11 @@ class CampaignMonitorAPIConnectorBase
     protected function getEnvOrConfigVar(string $envVar, string $configVar, ?bool $allowToBeEmpty = false)
     {
         $var = Environment::getEnv($envVar);
-        if (! $var) {
+        if (!$var) {
             $var = $this->Config()->get($configVar);
         }
         $var = trim($var);
-        if (! $var && false === $allowToBeEmpty) {
+        if (!$var && false === $allowToBeEmpty) {
             user_error('Please set .env var ' . $configVar . ' or config var ' . $configVar, E_USER_NOTICE);
         }
 
@@ -341,7 +342,7 @@ class CampaignMonitorAPIConnectorBase
      */
     protected function cleanCustomFields($customFields): array
     {
-        if (! is_array($customFields)) {
+        if (!is_array($customFields)) {
             $customFields = [];
         }
         $customFieldsBetter = [];
