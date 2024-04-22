@@ -19,9 +19,15 @@
     }
   ],
   "require": {
-    "campaignmonitor/createsend-php": "~6.1",
+    "campaignmonitor/createsend-php": "dev-master",
     "silverstripe/recipe-cms": "^4.0 || ^5.0"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:dnadesign/createsend-php.git"
+    }
+  ],
   "suggest": {
    "campaignmonitor/campaignmonitor": "The campaign monitor kitchen sink"
   },
