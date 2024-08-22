@@ -152,7 +152,7 @@ class CampaignMonitorAPIConnectorBase
     /**
      * provides the Authorisation Array.
      *
-     * @return array
+     * @return array|mixed
      */
     protected function getAuth()
     {
